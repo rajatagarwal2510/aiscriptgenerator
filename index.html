@@ -1,154 +1,250 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Your Ideas, Our Words – Instantly Scripted!</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+  <meta charset="UTF-8">
+  <title>Your Ideas, Our Words – Instantly Scripted!</title>
+  <style>
+    html, body {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: url('https://img.freepik.com/free-photo/beach-blur-background_1203-2762.jpg') no-repeat center center fixed;
+      background-size: cover;
+      background-attachment: fixed;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(5px);
+      z-index: -1;
+    }
+
+    .container {
+      max-width: 95%;
+      margin: 30px auto;
+      padding: 30px;
+      background-color: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      box-sizing: border-box;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 38px;
+      color: #4a004e;
+      margin-bottom: 25px;
+      background: linear-gradient(to right, #EC7FA9, #FDB7EA);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .center-topic {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .topic-input {
+      width: 70%;
+      padding: 14px;
+      font-size: 18px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: center;
+      background-color: rgba(255, 255, 255, 0.7);
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 20px;
+      color: #333;
+    }
+
+    select, input[type="range"], button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      margin-top: 10px;
+      background-color: rgba(255, 255, 255, 0.7);
+    }
+
+    select:hover, input[type="range"]:hover {
+      box-shadow: 0 0 8px #ec7fa999;
+      cursor: pointer;
+    }
+
+    button {
+      background-color: #ec7fa9;
+      color: white;
+      border: none;
+      font-weight: bold;
+      margin-top: 15px;
+    }
+
+    button:hover {
+      background-color: #b76687;
+      transform: scale(1.03);
+    }
+
+    .mood-emojis {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-size: 20px;
+      padding: 0 10px;
+    }
+
+    .current-mood {
+      text-align: center;
+      margin-top: 5px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #4a004e;
+    }
+
+    #outputBox {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: rgba(255,255,255,0.8);
+      border-radius: 10px;
+      white-space: pre-wrap;
+      min-height: 100px;
+      font-family: monospace;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+
+    .quote-box {
+      text-align: center;
+      margin-top: 30px;
+      font-style: italic;
+      color: #444;
+      background-color: rgba(255, 246, 250, 0.7);
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.08);
+    }
+
+    .flex-two {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .flex-two > div {
+      flex: 1;
+      min-width: 250px;
+    }
+
+    select {
+      background-color: #ffeaf6;
+      color: #4a004e;
+      border: 2px solid #ffaad4;
+      box-shadow: 0 4px 15px rgba(255, 192, 203, 0.4);
+      border-radius: 14px;
+      appearance: none;
+    }
+
+    select option {
+      background-color: #fff0fa;
+      color: #4a004e;
+      font-weight: 500;
+    }
+
+    select:focus {
+      outline: none;
+      background-color: #fff0fa;
+      box-shadow: 0 0 20px #ffa4d2;
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <h1>Your Ideas, Our Words – Instantly Scripted!</h1>
 
-    <div class="container">
-        <h1>Your Ideas, Our Words – Instantly Scripted!</h1>
-
-        <form id="scriptForm" onsubmit="generateScript(event)">
-            <input type="text" id="topic" placeholder="What's on your mind? ;)" required>
-
-            <label>Language Preference:</label>
-            <select id="language">
-                <option>English</option><option>Hindi</option><option>Hinglish</option>
-                <option>Marathi</option><option>Tamil</option><option>Telugu</option>
-            </select>
-
-            <label>Tone:</label>
-            <select id="tone">
-                <option>Formal</option><option>Casual</option><option>Funny</option>
-            </select>
-
-            <label>Mood:</label>
-            <input type="range" min="1" max="4" id="mood" step="1" onchange="updateMoodLabel(this.value)">
-            <div id="moodValue">😐 Neutral</div>
-
-            <label>Content Type:</label>
-            <select id="contentType">
-                <option>YouTube Script</option><option>Podcast Script</option>
-            </select>
-
-            <label>Target Audience:</label>
-            <select id="audience">
-                <option>Students</option><option>Working Professionals</option>
-            </select>
-
-            <label>Character Style:</label>
-            <select id="characterStyle">
-                <option value="Funny">Funny</option>
-                <option value="Serious">Serious</option>
-                <option value="Casual">Casual</option>
-            </select>
-
-            <label>Voice Type:</label>
-            <select id="voiceType">
-                <option value="Soft">Soft</option>
-                <option value="Energetic">Energetic</option>
-                <option value="Dramatic">Dramatic</option>
-                <option value="Quirky">Quirky</option>
-            </select>
-
-            <label>Creative Enhancer:</label>
-            <select id="creativity">
-                <option value="Off">Off</option>
-                <option value="On">On</option>
-            </select>
-
-            <label>Length of Content:</label>
-            <select id="length">
-                <option>Short (1-2 mins)</option><option>Medium (3-5 mins)</option>
-            </select>
-
-            <button type="submit">✨ Generate Script</button>
-        </form>
-
-        <h3>Generated Script:</h3>
-        <div id="outputBox"></div>
-
-        <!-- 🔊 Button to Convert Script to Speech -->
-        <button onclick="convertToAudio()">🔊 Convert to Audio</button>
-
-        <!-- 🎙️ Audio Player (Hidden Initially) -->
-        <audio id="audioPlayer" controls style="display: none;"></audio>
+    <div class="center-topic">
+      <input type="text" id="topic" placeholder="What's on your mind? ;)" class="topic-input">
     </div>
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <label>Language Preference:</label>
+    <select id="language">
+      <option>English</option><option>Hindi</option><option>Hinglish</option>
+      <option>Marathi</option><option>Tamil</option><option>Telugu</option>
+      <option>Kannada</option><option>Bengali</option><option>Gujarati</option>
+      <option>Punjabi</option><option>Urdu</option>
+    </select>
 
-    <script>
-        function updateMoodLabel(value) {
-            const moods = ["🧘 Calm", "😐 Neutral", "🔥 Bold", "🤣 Playful"];
-            document.getElementById("moodValue").textContent = moods[value - 1];
-        }
+    <label>Tone:</label>
+    <select id="tone">
+      <option>Formal</option><option>Casual</option><option>Funny</option><option>Inspirational</option>
+    </select>
 
-        async function generateScript(event) {
-            event.preventDefault();  // ❌ Prevent Form Reload
+    <label>Mood:</label>
+    <input type="range" min="1" max="4" id="mood" step="1">
+    <div class="mood-emojis">
+      <span>🧘 Calm</span><span>😐 Neutral</span><span>🔥 Bold</span><span>🤣 Playful</span>
+    </div>
+    <div class="current-mood" id="moodValue"></div>
 
-            const data = {
-                topic: document.getElementById("topic").value,
-                language: document.getElementById("language").value,
-                tone: document.getElementById("tone").value,
-                mood: document.getElementById("mood").value,
-                contentType: document.getElementById("contentType").value,
-                audience: document.getElementById("audience").value,
-                length: document.getElementById("length").value,
-                characterStyle: document.getElementById("characterStyle").value,
-                voiceType: document.getElementById("voiceType").value,
-                creativity: document.getElementById("creativity").value
-            };
+    <label>Content Type:</label>
+    <select id="contentType">
+      <option>YouTube Script</option><option>Podcast Script</option><option>Reel/Shorts Caption</option>
+      <option>Vlog Script</option><option>Educational Video</option><option>Social Media Post</option>
+      <option>Interview Questions</option><option>Ad Copy</option>
+    </select>
 
-            document.getElementById("outputBox").innerHTML = "⏳ Generating script... please wait...";
+    <label>Target Audience:</label>
+    <select id="audience">
+      <option>Students</option><option>Working Professionals</option><option>General Public</option>
+    </select>
 
-            try {
-                let res = await fetch('/generate_script', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
+    <label>Length of Content:</label>
+    <select id="length">
+      <option>Short (1-2 mins)</option><option>Medium (3-5 mins)</option><option>Long (5+ mins)</option>
+    </select>
 
-                let result = await res.json();
-                if (result.script) {
-                    document.getElementById("outputBox").innerText = result.script;
-                } else {
-                    document.getElementById("outputBox").innerHTML = "❌ Error: " + result.error;
-                }
-            } catch (err) {
-                document.getElementById("outputBox").innerHTML = "⚠️ Something went wrong: " + err;
-            }
-        }
+    <div class="flex-two">
+      <div>
+        <label>Character Style:</label>
+        <select id="characterStyle">
+          <option>Funny Friend</option><option>Serious Teacher</option>
+          <option>Cool Influencer</option><option>Motivational Guru</option>
+        </select>
+      </div>
+      <div>
+        <label>Voice Type:</label>
+        <select id="voiceType">
+          <option>Soft</option><option>Energetic</option>
+          <option>Dramatic</option><option>Quirky</option>
+        </select>
+      </div>
+    </div>
 
-        async function convertToAudio() {
-            const scriptText = document.getElementById("outputBox").innerText.trim();
+    <label>Creative Enhancer:</label>
+    <select id="creativity"><option>Off</option><option>On</option></select>
 
-            if (!scriptText) {
-                alert("No script available for conversion.");
-                return;
-            }
+    <button id="generateBtn">✨ Generate Script</button>
+    <button id="convertAudioBtn">🔊 Convert to Audio</button>
 
-            try {
-                let res = await fetch('/text_to_speech', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: scriptText })
-                });
+    <h3>Generated Script:</h3>
+    <div id="outputBox"></div>
+    <audio id="audioPlayer" style="display:none;" controls></audio>
 
-                let result = await res.json();
+    <div class="quote-box" id="quote">“Creativity is intelligence having fun.” – Albert Einstein</div>
+  </div>
 
-                if (res.ok && result.audio_url) {
-                    document.getElementById("audioPlayer").src = result.audio_url;
-                    document.getElementById("audioPlayer").style.display = "block";
-                    document.getElementById("audioPlayer").play();
-                } else {
-                    alert("Error: " + (result.error || "Unknown error"));
-                }
-            } catch (err) {
-                alert("Something went wrong: " + err);
-            }
-        }
-    </script>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
