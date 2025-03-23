@@ -1,89 +1,72 @@
-// Function to update Mood Label
-function updateMoodLabel(value) {
-    const moods = ["🧘 Calm", "😐 Neutral", "🔥 Bold", "🤣 Playful"];
-    document.getElementById("moodValue").textContent = moods[value - 1];
-}
+document.getElementById("generateBtn").addEventListener("click", function () {
+    const topic = document.getElementById("topic").value;
+    const language = document.getElementById("language").value;
+    const tone = document.getElementById("tone").value;
+    const moodValue = document.getElementById("mood").value;
+    const moodEmoji = ["🧘 Calm", "😐 Neutral", "🔥 Bold", "🤣 Playful"][moodValue - 1];
+    document.getElementById("moodValue").innerText = moodEmoji;
+    const contentType = document.getElementById("contentType").value;
+    const audience = document.getElementById("audience").value;
+    const length = document.getElementById("length").value;
+    const characterStyle = document.getElementById("characterStyle").value;
+    const voiceType = document.getElementById("voiceType").value;
+    const creativity = document.getElementById("creativity").value;
 
-// Function to Send Data to Flask API
-async function generateScript(event) {
-    event.preventDefault();  // ❌ Form reload hone se roke
+    document.getElementById("outputBox").innerText = "✨ Generating script... Please wait...";
 
-    const data = {
-        characterStyle: document.getElementById("characterStyle").value,
-        voiceType: document.getElementById("voiceType").value,
-        topic: document.getElementById("topic").value,
-        language: document.getElementById("language").value,
-        tone: document.getElementById("tone").value,
-        mood: document.getElementById("mood").value,
-        contentType: document.getElementById("contentType").value,
-        audience: document.getElementById("audience").value,
-        length: document.getElementById("length").value,
-        creativity: document.getElementById("creativity").value
-    };
-    
-    }
-    async function convertToAudio() {
-        const scriptText = document.getElementById("outputBox").innerText.trim();
-    
-        if (!scriptText) {
-            alert("No script available for conversion.");
-            return;
-        }
-    
-        try {
-            let res = await fetch('/text_to_speech', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: scriptText })
-            });
-    
-            let result = await res.json();
-    
-            if (res.ok && result.audio_url) {
-                document.getElementById("audioPlayer").src = result.audio_url;
-                document.getElementById("audioPlayer").style.display = "block";
-                document.getElementById("audioPlayer").play();
-            } else {
-                alert("Error: " + (result.error || "Unknown error"));
-            }
-        } catch (err) {
-            alert("Something went wrong: " + err);
-        }
-    }
-    
-    
-
-    document.getElementById("outputBox").innerHTML = "⏳ Generating script... please wait...";
-
-    try {
-        let res = await fetch('/generate_script', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-        
-        let result = await res.json();
-        if (result.script) {
-            typeWriterEffect(result.script, 0);
+    fetch("/generate_script", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            topic,
+            language,
+            tone,
+            mood: moodEmoji,
+            contentType,
+            audience,
+            length,
+            characterStyle,
+            voiceType,
+            creativity
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.script) {
+            document.getElementById("outputBox").innerText = data.script;
         } else {
-            document.getElementById("outputBox").innerHTML = "❌ Error: " + result.error;
+            document.getElementById("outputBox").innerText = "❌ Error: " + (data.error || "No script generated.");
         }
-    } catch (err) {
-        document.getElementById("outputBox").innerHTML = "⚠️ Something went wrong: " + err;
+    })
+    .catch(error => {
+        document.getElementById("outputBox").innerText = "❌ Request failed: " + error;
+    });
+});
+
+
+document.getElementById("convertAudioBtn").addEventListener("click", function () {
+    const scriptText = document.getElementById("outputBox").innerText;
+
+    if (!scriptText || scriptText.startsWith("❌")) {
+        alert("Please generate a script first!");
+        return;
     }
-}
 
-// Function to Create Typewriter Effect
-function typeWriterEffect(text, i) {
-    const box = document.getElementById("outputBox");
-    box.innerHTML = "";
-    const typing = setInterval(() => {
-        if (i < text.length) {
-            box.innerHTML += text.charAt(i);
-            i++;
+    fetch("/text_to_speech", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: scriptText })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.audio_url) {
+            const audioPlayer = document.getElementById("audioPlayer");
+            audioPlayer.src = data.audio_url;
+            audioPlayer.style.display = "block";
+            audioPlayer.play();
         } else {
-            clearInterval(typing);
+            alert("Audio conversion failed: " + data.error);
         }
-    }, 20);
-}
-
+    })
+    .catch(error => alert("Error converting to audio: " + error));
+});
