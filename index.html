@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Ideas, Our Words – Instantly Scripted!</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Your Ideas, Our Words – Instantly Scripted!</h1>
+
+        <form id="scriptForm" onsubmit="generateScript(event)">
+            <input type="text" id="topic" placeholder="What's on your mind? ;)" required>
+
+            <label>Language Preference:</label>
+            <select id="language">
+                <option>English</option><option>Hindi</option><option>Hinglish</option>
+                <option>Marathi</option><option>Tamil</option><option>Telugu</option>
+            </select>
+
+            <label>Tone:</label>
+            <select id="tone">
+                <option>Formal</option><option>Casual</option><option>Funny</option>
+            </select>
+
+            <label>Mood:</label>
+            <input type="range" min="1" max="4" id="mood" step="1" onchange="updateMoodLabel(this.value)">
+            <div id="moodValue">😐 Neutral</div>
+
+            <label>Content Type:</label>
+            <select id="contentType">
+                <option>YouTube Script</option><option>Podcast Script</option>
+            </select>
+
+            <label>Target Audience:</label>
+            <select id="audience">
+                <option>Students</option><option>Working Professionals</option>
+            </select>
+
+            <label>Character Style:</label>
+            <select id="characterStyle">
+                <option value="Funny">Funny</option>
+                <option value="Serious">Serious</option>
+                <option value="Casual">Casual</option>
+            </select>
+
+            <label>Voice Type:</label>
+            <select id="voiceType">
+                <option value="Soft">Soft</option>
+                <option value="Energetic">Energetic</option>
+                <option value="Dramatic">Dramatic</option>
+                <option value="Quirky">Quirky</option>
+            </select>
+
+            <label>Creative Enhancer:</label>
+            <select id="creativity">
+                <option value="Off">Off</option>
+                <option value="On">On</option>
+            </select>
+
+            <label>Length of Content:</label>
+            <select id="length">
+                <option>Short (1-2 mins)</option><option>Medium (3-5 mins)</option>
+            </select>
+
+            <button type="submit">✨ Generate Script</button>
+        </form>
+
+        <h3>Generated Script:</h3>
+        <div id="outputBox"></div>
+
+        <!-- 🔊 Button to Convert Script to Speech -->
+        <button onclick="convertToAudio()">🔊 Convert to Audio</button>
+
+        <!-- 🎙️ Audio Player (Hidden Initially) -->
+        <audio id="audioPlayer" controls style="display: none;"></audio>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <script>
+        function updateMoodLabel(value) {
+            const moods = ["🧘 Calm", "😐 Neutral", "🔥 Bold", "🤣 Playful"];
+            document.getElementById("moodValue").textContent = moods[value - 1];
+        }
+
+        async function generateScript(event) {
+            event.preventDefault();  // ❌ Prevent Form Reload
+
+            const data = {
+                topic: document.getElementById("topic").value,
+                language: document.getElementById("language").value,
+                tone: document.getElementById("tone").value,
+                mood: document.getElementById("mood").value,
+                contentType: document.getElementById("contentType").value,
+                audience: document.getElementById("audience").value,
+                length: document.getElementById("length").value,
+                characterStyle: document.getElementById("characterStyle").value,
+                voiceType: document.getElementById("voiceType").value,
+                creativity: document.getElementById("creativity").value
+            };
+
+            document.getElementById("outputBox").innerHTML = "⏳ Generating script... please wait...";
+
+            try {
+                let res = await fetch('/generate_script', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                let result = await res.json();
+                if (result.script) {
+                    document.getElementById("outputBox").innerText = result.script;
+                } else {
+                    document.getElementById("outputBox").innerHTML = "❌ Error: " + result.error;
+                }
+            } catch (err) {
+                document.getElementById("outputBox").innerHTML = "⚠️ Something went wrong: " + err;
+            }
+        }
+
+        async function convertToAudio() {
+            const scriptText = document.getElementById("outputBox").innerText.trim();
+
+            if (!scriptText) {
+                alert("No script available for conversion.");
+                return;
+            }
+
+            try {
+                let res = await fetch('/text_to_speech', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: scriptText })
+                });
+
+                let result = await res.json();
+
+                if (res.ok && result.audio_url) {
+                    document.getElementById("audioPlayer").src = result.audio_url;
+                    document.getElementById("audioPlayer").style.display = "block";
+                    document.getElementById("audioPlayer").play();
+                } else {
+                    alert("Error: " + (result.error || "Unknown error"));
+                }
+            } catch (err) {
+                alert("Something went wrong: " + err);
+            }
+        }
+    </script>
+</body>
+</html>
